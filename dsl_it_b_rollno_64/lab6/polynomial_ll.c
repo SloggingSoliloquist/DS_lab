@@ -8,124 +8,88 @@ struct polynomial *next;
 struct polynomial *prev;
 }polynomial;
 
-void add_polynomials(polynomial **result, polynomial **head1, polynomial **head2)
-{
-    polynomial *current1 = *head1;
-    polynomial *current2 = *head2;
-    *result = NULL;
-    polynomial *current_res = *result;
-    while(current1!=NULL && current2!=NULL)
-    {
-        if(current1->exp == current2->exp)
-        {
-            if(*result==NULL)
-            {
-                *result = (polynomial *)malloc(sizeof(polynomial));
-                (*result)->coeff=(current1->coeff +current2->coeff);
-                (*result)->exp= current1->exp;
-                current1 = current1->next;
-                current2 = current2->next;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current_res = current_res->next;
-            }
-            else
-            {
-                current_res->coeff = (current1->coeff +current2->coeff);
-                current_res->coeff = current1->exp;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current1 = current1->next;
-                current2 = current2->next;
-                current_res = current_res->next;
-            }
-        }
-        else if(current1->exp > current2->exp)
-        {
-            if(*result==NULL)
-            {
-                *result = (polynomial *)malloc(sizeof(polynomial));
-                (*result)->coeff=(current1->coeff);
-                (*result)->exp= current1->exp;
-                current1 = current1->next;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current_res = current_res->next;
-            }
-            else
-            {
-                current_res->coeff = (current1->coeff);
-                current_res->coeff = current1->exp;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current1 = current1->next;
-                current_res = current_res->next;
-            }
-        }
-        else
-        {
-            if(*result==NULL)
-            {
-                *result = (polynomial *)malloc(sizeof(polynomial));
-                (*result)->coeff=(current2->coeff);
-                (*result)->exp= current2->exp;
-                current2 = current2->next;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current_res = current_res->next;
-            }
-            else
-            {
-                current_res->coeff = (current2->coeff);
-                current_res->coeff = current2->exp;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current2 = current2->next;
-                current_res = current_res->next;
-            }
-
-        }
-    }
-    while(current1!=NULL)
-    {
-            if(*result==NULL)
-            {
-                *result = (polynomial *)malloc(sizeof(polynomial));
-                (*result)->coeff=(current1->coeff);
-                (*result)->exp= current1->exp;
-                current1 = current1->next;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current_res = current_res->next;
-            }
-            else
-            {
-                current_res->coeff = (current1->coeff);
-                current_res->coeff = current1->exp;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current1 = current1->next;
-                current_res = current_res->next;
-            }
-    }
-    while(current2!=NULL)
-    {
-            if(*result==NULL)
-            {
-                *result = (polynomial *)malloc(sizeof(polynomial));
-                (*result)->coeff=(current2->coeff);
-                (*result)->exp= current2->exp;
-                current2 = current2->next;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current_res = current_res->next;
-            }
-            else
-            {
-                current_res->coeff = (current2->coeff);
-                current_res->coeff = current2->exp;
-                (current_res)->next= (polynomial*)malloc(sizeof(polynomial));
-                current2 = current2->next;
-                current_res = current_res->next;
-            }
-    }
-    current_res = NULL;
-
+void init_node(polynomial *node, int coeff, int exp) {
+    node->coeff = coeff;
+    node->exp = exp;
+    node->next = NULL;
+    node->prev = NULL;
 }
+#
+
+
+void add_polynomials(polynomial **result, polynomial *head1, polynomial *head2) {
+    *result = NULL;
+    polynomial *tail_res = NULL;
+
+    while (head1 != NULL && head2 != NULL) {
+        polynomial *node = NULL;
+
+        if (head1->exp == head2->exp) {
+            int sum = head1->coeff + head2->coeff;
+            if (sum != 0) {
+                node = (polynomial*)malloc(sizeof(polynomial));
+                init_node(node, sum, head1->exp);
+            }
+            head1 = head1->next;
+            head2 = head2->next;
+        }
+        else if (head1->exp > head2->exp) {
+            node = (polynomial*)malloc(sizeof(polynomial));
+            init_node(node, head1->coeff, head1->exp);
+            head1 = head1->next;
+        }
+        else {
+            node = (polynomial*)malloc(sizeof(polynomial));
+            init_node(node, head2->coeff, head2->exp);
+            head2 = head2->next;
+        }
+
+        if (node) {
+            if (*result == NULL) {
+                *result = node;
+                tail_res = node;
+            } else {
+                tail_res->next = node;
+                node->prev = tail_res;
+                tail_res = node;
+            }
+        }
+    }
+
+    // Append leftover nodes
+    while (head1 != NULL) {
+        polynomial *node = (polynomial*)malloc(sizeof(polynomial));
+        init_node(node, head1->coeff, head1->exp);
+
+        if (*result == NULL) {
+            *result = node;
+            tail_res = node;
+        } else {
+            tail_res->next = node;
+            node->prev = tail_res;
+            tail_res = node;
+        }
+        head1 = head1->next;
+    }
+
+    while (head2 != NULL) {
+        polynomial *node = (polynomial*)malloc(sizeof(polynomial));
+        init_node(node, head2->coeff, head2->exp);
+
+        if (*result == NULL) {
+            *result = node;
+            tail_res = node;
+        } else {
+            tail_res->next = node;
+            node->prev = tail_res;
+            tail_res = node;
+        }
+        head2 = head2->next;
+    }
+}
+
 void display_polynomial(polynomial *head)
 {
-    printf("Entered");
     if(head==NULL)
     {
         printf("The list is empty: ");
@@ -187,9 +151,8 @@ int main()
     display_polynomial(head1);
     printf("\nPolynomial 2: \n");
     display_polynomial(head2);
-    printf("Polynomial Res: ");
-    display_polynomial(head2);
-    add_polynomials(&res, &head1, &head2);
+    add_polynomials(&res, head1, head2);
+    printf("\nPolynomial res: \n");
     display_polynomial(res);
 return 0;
 }
