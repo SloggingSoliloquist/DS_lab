@@ -1,72 +1,76 @@
-#include<stdio.h>
-#include<stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-struct BTree{
-int val;
-struct BTree *left;
-struct BTree *right;
-}*root=NULL;
+// Structure for a tree node
+struct Node {
+    int data;
+    struct Node *left, *right;
+};
 
-void add_node(struct BTree **parent, struct BTree **current)
-{
-int choice_left, choice_right;
-printf("Do you want to add a link to the left? :0/1");
-scanf("%d", &choice_left);
-printf("Do you want to add a link to the right? : 0/1");
-scanf("%d", &choice_right);
-if(choice_left==1)
-{
-(*parent)->left = (struct BTree*)malloc(sizeof(struct BTree));
-printf("Enter the value: ");
-scanf("%d",&(*parent)->left->val);
-*current= (*parent)->left;
+// Function to create a new node
+struct Node* newNode(int data) {
+    struct Node* node = (struct Node*)malloc(sizeof(struct Node));
+    node->data = data;
+    node->left = node->right = NULL;
+    return node;
 }
-if(choice_right==1)
-{
-(*parent)->right = (struct BTree*)malloc(sizeof(struct BTree));
-printf("Enter the value: ");
-scanf("%d",&(*parent)->right->val);
-*current= (*parent)->right;
+
+// i) Recursive function to create a binary tree
+struct Node* createTree() {
+    int data;
+    printf("Enter data (-1 for no node): ");
+    scanf("%d", &data);
+
+    if (data == -1)
+        return NULL;  // base case — no node
+
+    struct Node* root = newNode(data);
+    printf("Enter left child of %d\n", data);
+    root->left = createTree();
+    printf("Enter right child of %d\n", data);
+    root->right = createTree();
+
+    return root;
 }
+
+// Helper function to find the height of the tree
+int height(struct Node* root) {
+    if (root == NULL)
+        return 0;
+    int lh = height(root->left);
+    int rh = height(root->right);
+    return (lh > rh ? lh : rh) + 1;
 }
-void create_BTree(struct BTree *node, struct BTree **left_node, struct BTree **right_node, int val)
-{
-    if(*left_node==NULL && *right_node==NULL)
-    {
+
+// Function to print nodes at a given level
+void printLevel(struct Node* root, int level) {
+    if (root == NULL)
         return;
-    }
-    else if(*left_node==NULL)
-    {
-        (*right_node)->val=val;
-        printf("Enter the value of the right node: ");
-        create_BTree(node, &right_node, NULL);
-
-    }
-    else
-    {
-
-        (*left_node)->val = val;
-        printf("ENter the value of the left node: ");
-        create_BTree(node, &left_node, NULL);
+    if (level == 1)
+        printf("%d ", root->data);
+    else {
+        printLevel(root->left, level - 1);
+        printLevel(root->right, level - 1);
     }
 }
 
-
-void print_BTree(struct BTree *node)
-{
-    if(node == NULL)
-    {
-        return;
+// ii) Function to print the tree in level-order (recursively)
+void levelOrder(struct Node* root) {
+    int h = height(root);
+    for (int i = 1; i <= h; i++) {
+        printLevel(root, i);
     }
-    printf("%d\n", node->val);
-    return print_BTree(node->left);
-    return print_BTree(node->right);
-
 }
-int main()
-{
-    create_BTree(root);
-    printf("Do you really know what you are doing or are you bluffing?");
-    print_BTree(root);
-return 0;
+
+int main() {
+    struct Node* root = NULL;
+
+    printf("Create the binary tree:\n");
+    root = createTree();
+
+    printf("\nLevel-order traversal: ");
+    levelOrder(root);
+    printf("\n");
+
+    return 0;
 }
